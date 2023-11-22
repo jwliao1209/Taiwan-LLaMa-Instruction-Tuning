@@ -1,57 +1,55 @@
 import torch
 from torch.utils.data.dataset import Dataset
-
 from src.utils import get_prompt
 
 
+def pad_or_truncate(data, max_length, padding_token=0):
+    if max_length >= len(data):
+        return data + [padding_token] * (max_length - len(data))
+    else:
+        return data[:max_length]
+
+
 class ClassicalChineseDataset(Dataset):
-    def __init__(self, data_list, tokenizer, max_length=512):
-        self.data_list = data_list
+    def __init__(self, data_list, tokenizer, max_length=2048):
         self.tokenizer = tokenizer
         self.max_length = max_length
-        self.processed_data = self.process()
+        self.data_list = self.transform(data_list)
 
-    def __len__(self):
-        return len(self.processed_data)
+    def transform(self, data_list):
+        instructions = [get_prompt(x["instruction"]) for x in data_list]
+        outputs = [x["output"] for x in data_list]
 
-    def __getitem__(self, index):
-        return self.processed_data[index]
-
-    def process(self):
-        data_size = len(self.data_list)
-        instructions = [get_prompt(x["instruction"]) for x in self.data_list]
-        outputs = [x["output"] for x in self.data_list]
-
-        # Tokenize data
         tokenized_instructions = self.tokenizer(instructions, add_special_tokens=False)
         tokenized_outputs = self.tokenizer(outputs, add_special_tokens=False)
-        # labels = self.tokenizer(outputs, max_length=128, padding="max_length", truncation=True)["input_ids"]
 
-        tokenized_instructions["labels"] = []
+        processed_data = []
+        for i in range(len(data_list)):
+            instructions_input_ids = [self.tokenizer.bos_token_id] + tokenized_instructions["input_ids"][i]
+            outputs_input_ids = tokenized_outputs["input_ids"][i] + [self.tokenizer.eos_token_id]
 
-        # Format data
-        for i in range(data_size):
-            instruction_input_ids = [self.tokenizer.bos_token_id] + tokenized_instructions["input_ids"][i]  # .bos_token_id = 0
-            output_input_ids = tokenized_outputs["input_ids"][i] + [self.tokenizer.eos_token_id]  # .eos_token_id = 2
-            tokenized_instructions["input_ids"][i] = instruction_input_ids + output_input_ids
-            tokenized_instructions["attention_mask"][i] = [1] * len(tokenized_instructions["input_ids"][i])  # .attention_mask = 1
-            tokenized_instructions["input_ids"][i] = tokenized_instructions["input_ids"][i][:self.max_length]
-            tokenized_instructions["attention_mask"][i] = tokenized_instructions["attention_mask"][i][:self.max_length]
+            processed_data_input_ids =  instructions_input_ids + outputs_input_ids
+            processed_data_attention_mask = [1] * len(processed_data_input_ids)
+            processed_data_labels = [-100] * len(instructions_input_ids) + outputs_input_ids
+            processed_data_output_mask = [0] * len(instructions_input_ids) + [1] * len(outputs_input_ids)
 
-            length = len(tokenized_instructions["input_ids"][i])
-            tokenized_instructions["input_ids"][i] += [0] * (self.max_length - length)
-            tokenized_instructions["attention_mask"][i] += [0] * (self.max_length - length)
+            processed_data_input_ids = pad_or_truncate(processed_data_input_ids, self.max_length, 0)
+            processed_data_attention_mask = pad_or_truncate(processed_data_attention_mask, self.max_length, 0)
+            processed_data_labels = pad_or_truncate(processed_data_labels, self.max_length, 0)
+            processed_data_output_mask = pad_or_truncate(processed_data_output_mask, self.max_length, 0)
 
-            tokenized_instructions["input_ids"][i] = torch.tensor(tokenized_instructions["input_ids"][i])
-            tokenized_instructions["attention_mask"][i] = torch.tensor(tokenized_instructions["attention_mask"][i])
-            
-            tokenized_instructions["labels"].append(torch.tensor(
-                ([0] * len(instruction_input_ids) + output_input_ids)[:self.max_length] + [0] * (self.max_length - length)
-            ))
-            
-            
-        # tokenized_instructions["labels"] = [torch.tensor(l) for l in labels]
-        
-        tokenized_instructions = dict(tokenized_instructions)
-        processed_data = [dict((k, tokenized_instructions[k][i]) for k in tokenized_instructions) for i in range(data_size)]
+            processed_data.append(
+                {
+                    "input_ids": torch.tensor(processed_data_input_ids),
+                    "attention_mask": torch.tensor(processed_data_attention_mask),
+                    "labels": torch.tensor(processed_data_labels),
+                    "output_mask": torch.tensor(processed_data_output_mask),
+                }
+            )
         return processed_data
+
+    def __len__(self):
+        return len(self.data_list)
+
+    def __getitem__(self, index):
+        return self.data_list[index]

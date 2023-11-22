@@ -4,7 +4,7 @@ from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import json
 from peft import PeftModel
-from utils import get_prompt, get_bnb_config
+from src.utils import get_prompt, get_bnb_config
 import argparse
 
 
@@ -65,27 +65,28 @@ def perplexity(
 
 
 if __name__ == "__main__":
+    from src.utils import set_random_seeds
+    set_random_seeds()
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--base_model_path",
         type=str,
-        default="Taiwan-LLM-7B-v2.0-chat",
+        default="pretrain/Taiwan-LLM-7B-v2.0-chat",
         help="Path to the checkpoint of Taiwan-LLM-7B-v2.0-chat. If not set, this script will use "
         "the checkpoint from Huggingface (revision = 5073b2bbc1aa5519acdc865e99832857ef47f7c9)."
     )
-    # parser.add_argument(
-    #     "--peft_path",
-    #     type=str,
-    #     required=True,
-    #     help="Path to the saved PEFT checkpoint."
-    # )
-    # parser.add_argument(
-    #     "--test_data_path",
-    #     type=str,
-    #     default="",
-    #     required=True,
-    #     help="Path to test data."
-    # )
+    parser.add_argument(
+        "--peft_path",
+        type=str,
+        default="checkpoint/epoch=3_loss=0.12476359933614731",
+        help="Path to the saved PEFT checkpoint."
+    )
+    parser.add_argument(
+        "--test_data_path",
+        type=str,
+        default="data/public_test.json",
+        help="Path to test data."
+    )
     args = parser.parse_args()
 
     # Load model
@@ -113,12 +114,11 @@ if __name__ == "__main__":
             revision=revision,
         )
     print(model)
-    exit()
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
     # Load LoRA
-    # model = PeftModel.from_pretrained(model, args.peft_path)
+    model = PeftModel.from_pretrained(model, args.peft_path)
     
 
     with open(args.test_data_path, "r") as f:
