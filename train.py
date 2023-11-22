@@ -47,6 +47,9 @@ def parse_arguments() -> Namespace:
     parser.add_argument("--warm_up_step", type=int,
                         default=0,
                         help="number of warm up steps")
+    parser.add_argument("--lora_rank", type=int,
+                        default=64,
+                        help="rank of lora")
     return parser.parse_args()
 
 
@@ -80,7 +83,7 @@ if __name__ == "__main__":
     peft_config = LoraConfig(
         lora_alpha=16,
         lora_dropout=0.1,
-        r=64,
+        r=args.lora_rank,
         bias="none",
         task_type="CAUSAL_LM",
     )

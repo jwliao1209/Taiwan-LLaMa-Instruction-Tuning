@@ -34,5 +34,5 @@ jobs:
 
       # Run the scripts
       - name: Run the scripts
-       run: |
+        run: |
          bash test/run_test.sh
