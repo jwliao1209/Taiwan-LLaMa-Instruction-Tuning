@@ -42,10 +42,10 @@ class ClassicalChineseDataset(Dataset):
             processed_data.append(
                 {
                     "id": ids[i],
-                    "input_ids": torch.tensor(processed_data_input_ids),
-                    "attention_mask": torch.tensor(processed_data_attention_mask),
-                    "labels": torch.tensor(processed_data_labels),
-                    "output_mask": torch.tensor(processed_data_output_mask),
+                    "input_ids": processed_data_input_ids,
+                    "attention_mask": processed_data_attention_mask,
+                    "labels": processed_data_labels,
+                    "output_mask": processed_data_output_mask,
                 }
             )
         return processed_data
