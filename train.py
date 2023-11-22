@@ -104,8 +104,8 @@ if __name__ == "__main__":
         project="adl_hw3",
         name="experiment", 
         config={
-            "tokenizer": args.tokenizer_name,
-            "model": args.model_name_or_path,
+            "tokenizer": args.base_model_path,
+            "model": args.base_model_path,
             "epoch": args.epoch,
             "batch_size": args.batch_size,
             "accum_grad_step": args.accum_grad_step,
@@ -118,6 +118,7 @@ if __name__ == "__main__":
     )
     wandb.watch(model, log="all")
 
+    # Start training
     trainer = Trainer(
         tokenizer=tokenizer,
         model=model,

@@ -11,7 +11,7 @@ def pad_or_truncate(data, max_length, padding_token=0):
 
 
 class ClassicalChineseDataset(Dataset):
-    def __init__(self, data_list, tokenizer, max_length=2048):
+    def __init__(self, data_list, tokenizer, max_length=512):
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.data_list = self.transform(data_list)
