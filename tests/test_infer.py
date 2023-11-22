@@ -1,3 +1,6 @@
+import sys
+sys.path.append('./')
+
 import torch
 from torch.utils.data import DataLoader
 
@@ -17,7 +20,7 @@ def parse_arguments() -> Namespace:
                         help="Path to the checkpoint of Taiwan-LLM-7B-v2.0-chat. If not set, this script will use "
                         "the checkpoint from Huggingface (revision = 5073b2bbc1aa5519acdc865e99832857ef47f7c9).")
     parser.add_argument("--test_data_path", type=str,
-                        default="data/public_train.json",
+                        default="tests/test_data.json",
                         help="Path to test data.")
     parser.add_argument("--batch_size", type=int,
                         default=1,
@@ -36,7 +39,7 @@ if __name__ == "__main__":
     # if tokenizer.pad_token_id is None:
     #     tokenizer.pad_token_id = tokenizer.eos_token_id
 
-    test_data = read_json(args.train_data_path)
+    test_data = read_json(args.test_data_path)
     # test_dataset = ClassicalChineseDataset(test_data, tokenizer)
     # test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_func)
 

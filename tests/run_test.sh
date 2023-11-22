@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python test_infer.py --test_data_path test_data.json
+python tests/test_infer.py --test_data_path tests/test_data.json
