@@ -35,4 +35,4 @@ jobs:
       # Run the scripts
       - name: Run the scripts
         run: |
-         bash test/run_test.sh
+         bash tests/run_test.sh
