@@ -33,6 +33,6 @@ jobs:
           pip install -r configs/requirements.txt
 
       # Run the scripts
-      #- name: Run the scripts
-      #  run: |
-      #    bash scripts/run_test.sh
+      - name: Run the scripts
+       run: |
+         bash test/run_test.sh
