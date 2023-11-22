@@ -17,6 +17,7 @@ class ClassicalChineseDataset(Dataset):
         self.data_list = self.transform(data_list)
 
     def transform(self, data_list):
+        ids = [x["id"] for x in data_list]
         instructions = [get_prompt(x["instruction"]) for x in data_list]
         outputs = [x["output"] for x in data_list]
 
@@ -40,6 +41,7 @@ class ClassicalChineseDataset(Dataset):
 
             processed_data.append(
                 {
+                    "id": ids[i],
                     "input_ids": torch.tensor(processed_data_input_ids),
                     "attention_mask": torch.tensor(processed_data_attention_mask),
                     "labels": torch.tensor(processed_data_labels),
@@ -53,3 +55,12 @@ class ClassicalChineseDataset(Dataset):
 
     def __getitem__(self, index):
         return self.data_list[index]
+
+
+def collate_func(data: list) -> dict:
+    # convert list of dict to dict of list
+    data_list_dict = {k: [dic[k] for dic in data] for k in data[0]}
+
+    # convert dict of list to dict of torch tensor
+    data_tensor_dict = {k: v if k in ["id"] else torch.tensor(v) for k, v in data_list_dict.items()}
+    return data_tensor_dict

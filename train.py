@@ -8,7 +8,7 @@ from argparse import Namespace, ArgumentParser
 from transformers import AutoModelForCausalLM, AutoTokenizer, get_scheduler
 from peft import LoraConfig, prepare_model_for_kbit_training, get_peft_model
 
-from src.dataset import ClassicalChineseDataset
+from src.dataset import ClassicalChineseDataset, collate_func
 from src.optimizer import get_optimizer
 from src.trainer import Trainer
 from src.utils import set_random_seeds, read_json, get_bnb_config
@@ -67,8 +67,8 @@ if __name__ == "__main__":
     train_dataset = ClassicalChineseDataset(train_data, tokenizer)
     valid_dataset = ClassicalChineseDataset(valid_data, tokenizer)
 
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
-    valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_func)
+    valid_loader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_func)
 
     # Prepare model
     bnb_config = get_bnb_config()
