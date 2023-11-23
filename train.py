@@ -26,17 +26,20 @@ def parse_arguments() -> Namespace:
     parser.add_argument("--valid_data_path", type=str,
                         default="data/public_test.json",
                         help="Path to validation data.")
+    parser.add_argument("--train_num", type=int,
+                        default=4000,
+                        help="number of training data")
     parser.add_argument("--batch_size", type=int,
-                        default=20,
+                        default=4,
                         help="batch size")
     parser.add_argument("--accum_grad_step", type=int,
-                        default=2,
+                        default=4,
                         help="accumulation gradient steps")
     parser.add_argument("--epoch", type=int,
                         default=1,
                         help="number of epochs")
     parser.add_argument("--lr", type=float,
-                        default=3e-4,
+                        default=2e-4,
                         help="learning rate")
     parser.add_argument("--weight_decay", type=float,
                         default=0,
@@ -64,7 +67,7 @@ if __name__ == "__main__":
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
-    train_data = read_json(args.train_data_path)[:3000]
+    train_data = read_json(args.train_data_path)[:args.train_num]
     valid_data = read_json(args.valid_data_path)
 
     train_dataset = ClassicalChineseDataset(train_data, tokenizer)
@@ -110,6 +113,7 @@ if __name__ == "__main__":
             "tokenizer": args.base_model_path,
             "model": args.base_model_path,
             "epoch": args.epoch,
+            "train_data_num": args.train_num,
             "batch_size": args.batch_size,
             "accum_grad_step": args.accum_grad_step,
             "optimizer": "adamw",
@@ -117,6 +121,7 @@ if __name__ == "__main__":
             "lr": args.lr,
             "weight_decay": args.weight_decay,
             "warm_up_step": args.warm_up_step,
+            "lora_rank": args.lora_rank,
         }
     )
     wandb.watch(model, log="all")

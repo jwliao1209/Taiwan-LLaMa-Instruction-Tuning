@@ -16,12 +16,19 @@ def parse_arguments() -> Namespace:
                         default="pretrain/Taiwan-LLM-7B-v2.0-chat",
                         help="Path to the checkpoint of Taiwan-LLM-7B-v2.0-chat. If not set, this script will use "
                         "the checkpoint from Huggingface (revision = 5073b2bbc1aa5519acdc865e99832857ef47f7c9).")
+    parser.add_argument("--peft_path",
+                        type=str,
+                        default="checkpoint/epoch=2_ppl=3.775403222084045",
+                        help="Path to the saved PEFT checkpoint.")
     parser.add_argument("--test_data_path", type=str,
-                        default="data/public_train.json",
+                        default="data/public_test.json",
                         help="Path to test data.")
     parser.add_argument("--batch_size", type=int,
                         default=1,
                         help="batch size")
+    parser.add_argument("--output_path", type=int,
+                        default=1,
+                        help="prediction.json")
     return parser.parse_args()
 
 
@@ -36,8 +43,8 @@ if __name__ == "__main__":
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
-    test_data = read_json(args.train_data_path)
-    test_dataset = ClassicalChineseDataset(test_data, tokenizer)
+    test_data = read_json(args.test_data_path)
+    test_dataset = ClassicalChineseDataset(test_data, tokenizer, is_train=False)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_func)
 
     # Prepare model
@@ -58,13 +65,13 @@ if __name__ == "__main__":
             batch_data = dict_to_device(batch_data, device)
             generated_tokens = model.generate(
                 input_ids=batch_data["input_ids"],
-                attention_mask=batch_data["attention_mask"],
             )
-            generations = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+            generations = tokenizer.batch_decode(generated_tokens, skip_special_tokens=False)
             prediction_list.extend(
                 [
                     {"id": ID, "output": pred}
                     for ID, pred in zip(batch_data["id"], generations)
                 ]
             )
+            exit()
     write_json(prediction_list, args.output_path)

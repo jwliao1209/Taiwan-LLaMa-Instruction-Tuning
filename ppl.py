@@ -1,16 +1,16 @@
+import json
+import argparse
 import torch
 import numpy as np
+
 from tqdm import tqdm
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import json
 from peft import PeftModel
-from src.utils import get_prompt, get_bnb_config
-import argparse
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+from src.utils import set_random_seeds, get_prompt, get_bnb_config
 
 
-def perplexity(
-    model, tokenizer, data, max_length=2048,
-):
+def perplexity(model, tokenizer, data, max_length=2048):
     data_size = len(data)
     instructions = [get_prompt(x["instruction"]) for x in data]
     outputs = [x["output"] for x in data]
@@ -64,8 +64,7 @@ def perplexity(
     return {"perplexities": ppls, "mean_perplexity": np.mean(ppls)}
 
 
-if __name__ == "__main__":
-    from src.utils import set_random_seeds
+if __name__ == "__main__": 
     set_random_seeds()
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -113,13 +112,13 @@ if __name__ == "__main__":
             model_name,
             revision=revision,
         )
-    print(model)
+
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
     # Load LoRA
     model = PeftModel.from_pretrained(model, args.peft_path)
-    
+    print(model)
 
     with open(args.test_data_path, "r") as f:
         data = json.load(f)

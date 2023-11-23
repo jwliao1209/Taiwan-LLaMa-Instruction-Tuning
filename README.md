@@ -19,7 +19,7 @@ bash ./download.sh
 ## Reproducing best result
 To reproduce our best result, you can run the commad:
 ```
-bash ./run.sh <data file> <output file>
+bash ./run.sh <pretrain_model_folder> <lora_model_folder> <input_data_path> <output_file_path>
 ```
 
 

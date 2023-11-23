@@ -11,9 +11,10 @@ def pad_or_truncate(data, max_length, padding_token=0):
 
 
 class ClassicalChineseDataset(Dataset):
-    def __init__(self, data_list, tokenizer, max_length=512):
+    def __init__(self, data_list, tokenizer, max_length=1024, is_train=True):
         self.tokenizer = tokenizer
         self.max_length = max_length
+        self.is_train = is_train
         self.data_list = self.transform(data_list)
 
     def transform(self, data_list):
@@ -25,29 +26,41 @@ class ClassicalChineseDataset(Dataset):
         tokenized_outputs = self.tokenizer(outputs, add_special_tokens=False)
 
         processed_data = []
-        for i in range(len(data_list)):
-            instructions_input_ids = [self.tokenizer.bos_token_id] + tokenized_instructions["input_ids"][i]
-            outputs_input_ids = tokenized_outputs["input_ids"][i] + [self.tokenizer.eos_token_id]
+        if self.is_train:
+            for i in range(len(data_list)):
+                instructions_input_ids = [self.tokenizer.bos_token_id] + tokenized_instructions["input_ids"][i]
+                outputs_input_ids = tokenized_outputs["input_ids"][i] + [self.tokenizer.eos_token_id]
 
-            processed_data_input_ids =  instructions_input_ids + outputs_input_ids
-            processed_data_attention_mask = [1] * len(processed_data_input_ids)
-            processed_data_labels = [-100] * len(instructions_input_ids) + outputs_input_ids
-            processed_data_output_mask = [0] * len(instructions_input_ids) + [1] * len(outputs_input_ids)
+                processed_data_input_ids =  instructions_input_ids + outputs_input_ids
+                processed_data_attention_mask = [1] * len(processed_data_input_ids)
+                processed_data_labels = [-100] * len(instructions_input_ids) + outputs_input_ids
+                processed_data_output_mask = [0] * len(instructions_input_ids) + [1] * len(outputs_input_ids)
 
-            processed_data_input_ids = pad_or_truncate(processed_data_input_ids, self.max_length, 0)
-            processed_data_attention_mask = pad_or_truncate(processed_data_attention_mask, self.max_length, 0)
-            processed_data_labels = pad_or_truncate(processed_data_labels, self.max_length, 0)
-            processed_data_output_mask = pad_or_truncate(processed_data_output_mask, self.max_length, 0)
+                processed_data_input_ids = pad_or_truncate(processed_data_input_ids, self.max_length, 0)
+                processed_data_attention_mask = pad_or_truncate(processed_data_attention_mask, self.max_length, 0)
+                processed_data_labels = pad_or_truncate(processed_data_labels, self.max_length, 0)
+                processed_data_output_mask = pad_or_truncate(processed_data_output_mask, self.max_length, 0)
 
-            processed_data.append(
-                {
-                    "id": ids[i],
-                    "input_ids": processed_data_input_ids,
-                    "attention_mask": processed_data_attention_mask,
-                    "labels": processed_data_labels,
-                    "output_mask": processed_data_output_mask,
-                }
-            )
+                processed_data.append(
+                    {
+                        "id": ids[i],
+                        "input_ids": processed_data_input_ids,
+                        "attention_mask": processed_data_attention_mask,
+                        "labels": processed_data_labels,
+                        "output_mask": processed_data_output_mask,
+                    }
+                )
+        else:
+            for i in range(len(data_list)):
+                processed_data_input_ids = [self.tokenizer.bos_token_id] + tokenized_instructions["input_ids"][i] + [self.tokenizer.eos_token_id]
+                processed_data_attention_mask = [1] * len(processed_data_input_ids)
+                processed_data.append(
+                    {
+                        "id": ids[i],
+                        "input_ids": pad_or_truncate(processed_data_input_ids, self.max_length, 0),
+                        "attention_mask": pad_or_truncate(processed_data_attention_mask, self.max_length, 0),
+                    }
+                )
         return processed_data
 
     def __len__(self):
@@ -64,3 +77,4 @@ def collate_func(data: list) -> dict:
     # convert dict of list to dict of torch tensor
     data_tensor_dict = {k: v if k in ["id"] else torch.tensor(v) for k, v in data_list_dict.items()}
     return data_tensor_dict
+
