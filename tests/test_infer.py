@@ -1,3 +1,6 @@
+import sys
+sys.path.append('./')
+
 import logging
 from tqdm import tqdm
 from argparse import Namespace, ArgumentParser
