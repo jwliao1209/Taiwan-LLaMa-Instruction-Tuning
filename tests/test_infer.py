@@ -49,10 +49,10 @@ if __name__ == "__main__":
     logger = logging.getLogger("ADL Homework3: Taiwan-LLaMa Inference")
 
     # Prepare dataset
-    tokenizer = AutoTokenizer.from_pretrained(args.base_model_path)
+    # tokenizer = AutoTokenizer.from_pretrained(args.base_model_path)
     test_data = read_json(args.test_data_path)
-    test_dataset = ClassicalChineseDataset(test_data, tokenizer, is_train=False)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_func)
+    # test_dataset = ClassicalChineseDataset(test_data, tokenizer, is_train=False)
+    # test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_func)
 
     # Prepare model
     # device = torch.device(f"cuda:0" if torch.cuda.is_available() else "cpu")
