@@ -39,11 +39,9 @@ def read_json(path: str) -> dict:
     return data
 
 
-def write_json(data_list: list, path: str) -> None:
+def save_json(obj: dict, path: str) -> None:
     with open(path, "w") as fp:
-        for data in data_list:
-            fp.write(json.dumps(data, ensure_ascii=False))
-            fp.write('\n')
+        json.dump(obj, fp, indent=4, ensure_ascii=False)
     return
 
 

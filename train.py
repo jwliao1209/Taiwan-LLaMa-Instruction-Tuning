@@ -30,13 +30,13 @@ def parse_arguments() -> Namespace:
                         default=4000,
                         help="number of training data")
     parser.add_argument("--batch_size", type=int,
-                        default=4,
+                        default=16,
                         help="batch size")
     parser.add_argument("--accum_grad_step", type=int,
-                        default=4,
+                        default=1,
                         help="accumulation gradient steps")
     parser.add_argument("--epoch", type=int,
-                        default=1,
+                        default=2,
                         help="number of epochs")
     parser.add_argument("--lr", type=float,
                         default=2e-4,
@@ -45,13 +45,13 @@ def parse_arguments() -> Namespace:
                         default=0,
                         help="weight decay")
     parser.add_argument("--lr_scheduler", type=str,
-                        default="linear",
-                        help="learning rate scheduler")
+                        default="constant",
+                        help="learning rate scheduler: linear, constant, cosine, cosine_warmup")
     parser.add_argument("--warm_up_step", type=int,
                         default=0,
                         help="number of warm up steps")
     parser.add_argument("--lora_rank", type=int,
-                        default=64,
+                        default=16,
                         help="rank of lora")
     return parser.parse_args()
 
@@ -64,8 +64,6 @@ if __name__ == "__main__":
 
     # Prepare dataset
     tokenizer = AutoTokenizer.from_pretrained(args.base_model_path)
-    if tokenizer.pad_token_id is None:
-        tokenizer.pad_token_id = tokenizer.eos_token_id
 
     train_data = read_json(args.train_data_path)[:args.train_num]
     valid_data = read_json(args.valid_data_path)
@@ -81,7 +79,7 @@ if __name__ == "__main__":
     model = AutoModelForCausalLM.from_pretrained(
         args.base_model_path,
         torch_dtype=torch.bfloat16,
-        quantization_config=bnb_config
+        quantization_config=bnb_config,
     )
     peft_config = LoraConfig(
         lora_alpha=16,

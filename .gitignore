@@ -2,6 +2,12 @@ data
 pretrain
 checkpoint
 checkpoint_old
+checkpoint_old1
+scripts
 wandb
 
 src/__pycache__
+prediction_private.json
+.ipynb_checkpoints/
+EDA.ipynb
+data_analysis/

@@ -1,13 +1,21 @@
-import torch
-from torch.utils.data import DataLoader
-
+import logging
 from tqdm import tqdm
 from argparse import Namespace, ArgumentParser
+
+import torch
+from torch.utils.data import DataLoader
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
 from src.dataset import ClassicalChineseDataset, collate_func
-from src.utils import set_random_seeds, read_json, get_bnb_config, dict_to_device, write_json
+from src.utils import set_random_seeds, read_json, get_bnb_config, dict_to_device, save_json
+
+
+logging.basicConfig(
+    format="%(asctime)s %(levelname)s %(message)s",
+    datefmt='%Y-%m-%d %H:%M:%S',
+    level=logging.DEBUG,
+)
 
 
 def parse_arguments() -> Namespace:
@@ -26,23 +34,19 @@ def parse_arguments() -> Namespace:
     parser.add_argument("--batch_size", type=int,
                         default=1,
                         help="batch size")
-    parser.add_argument("--output_path", type=int,
-                        default=1,
-                        help="prediction.json")
+    parser.add_argument("--output_path", type=str,
+                        default="public_prediction.json",
+                        help="output path")
     return parser.parse_args()
 
 
 if __name__ == "__main__":
-    # Fix random seed
     set_random_seeds()
-
     args = parse_arguments()
+    logger = logging.getLogger("ADL Homework3: Taiwan-LLaMa Inference")
 
     # Prepare dataset
     tokenizer = AutoTokenizer.from_pretrained(args.base_model_path)
-    if tokenizer.pad_token_id is None:
-        tokenizer.pad_token_id = tokenizer.eos_token_id
-
     test_data = read_json(args.test_data_path)
     test_dataset = ClassicalChineseDataset(test_data, tokenizer, is_train=False)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_func)
@@ -65,13 +69,18 @@ if __name__ == "__main__":
             batch_data = dict_to_device(batch_data, device)
             generated_tokens = model.generate(
                 input_ids=batch_data["input_ids"],
+                attention_mask=batch_data["attention_mask"],
             )
-            generations = tokenizer.batch_decode(generated_tokens, skip_special_tokens=False)
+            generations = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
+            generations = [g.replace(batch_data["prompt"][0], "").strip() for g in generations]
             prediction_list.extend(
                 [
-                    {"id": ID, "output": pred}
-                    for ID, pred in zip(batch_data["id"], generations)
+                    {"id": ID, "output": g}
+                    for ID, g in zip(batch_data["id"], generations)
                 ]
             )
-            exit()
-    write_json(prediction_list, args.output_path)
+            for prompt, ans in zip(batch_data["prompt"], generations):
+                logger.debug(f"Question:\n{prompt}\n")
+                logger.debug(f"Answer:\n{ans}\n")
+
+    save_json(prediction_list, args.output_path)

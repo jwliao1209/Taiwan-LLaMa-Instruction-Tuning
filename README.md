@@ -16,6 +16,7 @@ To download the datasets and model checkpoint, you can run the commad:
 bash ./download.sh
 ```
 
+
 ## Reproducing best result
 To reproduce our best result, you can run the commad:
 ```
