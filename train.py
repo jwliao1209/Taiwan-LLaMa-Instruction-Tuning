@@ -36,7 +36,7 @@ def parse_arguments() -> Namespace:
                         default=1,
                         help="accumulation gradient steps")
     parser.add_argument("--epoch", type=int,
-                        default=2,
+                        default=3,
                         help="number of epochs")
     parser.add_argument("--lr", type=float,
                         default=2e-4,

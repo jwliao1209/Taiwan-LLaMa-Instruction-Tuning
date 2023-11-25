@@ -39,7 +39,7 @@ class ClassicalChineseDataset(Dataset):
                 processed_data.append(
                     {
                         "id": ids[i],
-                        "input_ids": self.right_pad_or_truncate(processed_data_input_ids),
+                        "input_ids": self.pad_or_truncate(processed_data_input_ids),
                         "attention_mask": self.pad_or_truncate(processed_data_attention_mask),
                         "labels": self.pad_or_truncate(processed_data_labels),
                         "output_mask": self.pad_or_truncate(processed_data_output_mask),
