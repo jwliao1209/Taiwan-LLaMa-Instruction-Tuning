@@ -3,7 +3,6 @@ pretrain
 checkpoint
 checkpoint_old
 checkpoint_old1
-scripts
 wandb
 
 src/__pycache__

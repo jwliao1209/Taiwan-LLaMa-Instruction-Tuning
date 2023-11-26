@@ -22,6 +22,14 @@ To reproduce our best result, you can run the commad:
 ```
 bash ./run.sh <pretrain_model_folder> <lora_model_folder> <input_data_path> <output_file_path>
 ```
+For example:
+```
+bash ./run.sh \
+    pretrain/Taiwan-LLM-7B-v2.0-chat \
+    checkpoint/epoch=4_ppl=3.649335366725922 \
+    data/public_test.json \
+    public_prediction.json
+```
 
 
 ## Training
