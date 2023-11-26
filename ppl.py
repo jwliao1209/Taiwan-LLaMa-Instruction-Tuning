@@ -7,7 +7,8 @@ from tqdm import tqdm
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.utils import set_random_seeds, get_prompt, get_bnb_config
+from src.prompt import get_prompt, get_incontext_prompt
+from src.utils import set_random_seeds, get_bnb_config
 
 
 def perplexity(model, tokenizer, data, max_length=2048):
@@ -77,7 +78,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--peft_path",
         type=str,
-        default="checkpoint/epoch=3_loss=0.12476359933614731",
+        default="checkpoint/epoch=4_ppl=3.649335366725922",
         help="Path to the saved PEFT checkpoint."
     )
     parser.add_argument(
@@ -115,9 +116,11 @@ if __name__ == "__main__":
 
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
-
+    
     # Load LoRA
-    model = PeftModel.from_pretrained(model, args.peft_path)
+    if args.peft_path:
+        model = PeftModel.from_pretrained(model, args.peft_path)
+
     print(model)
 
     with open(args.test_data_path, "r") as f:

@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data.dataset import Dataset
-from src.utils import get_prompt
+from src.prompt import get_prompt
 
 
 class ClassicalChineseDataset(Dataset):
@@ -10,12 +10,9 @@ class ClassicalChineseDataset(Dataset):
         self.is_train = is_train
         self.data_list = self.transform(data_list)
 
-    def pad_or_truncate(self, data, padding_token=0, padding_side="right"):
+    def pad_or_truncate(self, data, padding_token=0):
         if self.max_length >= len(data):
-            if padding_side == "left":
-                return [padding_token] * (self.max_length - len(data)) + data
-            else:
-                return data + [padding_token] * (self.max_length - len(data))
+            return data + [padding_token] * (self.max_length - len(data))
         else:
             return data[:self.max_length]
 
@@ -52,8 +49,8 @@ class ClassicalChineseDataset(Dataset):
                 processed_data.append(
                     {
                         "id": ids[i],
-                        "input_ids": self.pad_or_truncate(processed_data_input_ids, padding_side="left"),
-                        "attention_mask": self.pad_or_truncate(processed_data_attention_mask, padding_side="left"),
+                        "input_ids": processed_data_input_ids,
+                        "attention_mask": processed_data_attention_mask,
                         "prompt": instructions[i],
                     }
                 )
