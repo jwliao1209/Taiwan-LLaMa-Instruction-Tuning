@@ -1,13 +1,18 @@
 #!/bin/bash
 
-# python infer.py \
-#     --base_model_path pretrain/Taiwan-LLM-7B-v2.0-chat \
-#     --peft_path checkpoint/epoch=2_ppl=3.775403222084045 \
-#     --test_data_path data/public_test.json \
-#     --output_path prediction_public.json
+if [ ! -d data ]; then
+    unzip data.zip
+fi
 
-python infer.py \
-    --base_model_path pretrain/Taiwan-LLM-7B-v2.0-chat \
-    --peft_path checkpoint_old1/epoch=2_ppl=3.775403222084045 \
-    --test_data_path data/private_test.json \
-    --output_path prediction_private.json
+if [ ! -d pretrain ]; then
+    unzip pretrain.zip
+fi
+
+if [ ! -d checkpoint ]; then
+    unzip checkpoint.zip
+fi
+
+python infer.py --base_model_path "${1}" \
+                --peft_path "${2}" \
+                --test_data_path "${3}" \
+                --output_path "${4}"

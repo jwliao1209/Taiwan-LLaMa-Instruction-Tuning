@@ -11,3 +11,4 @@ prediction_private.json
 .ipynb_checkpoints/
 EDA.ipynb
 data_analysis/
+tests/test_prediction.json
