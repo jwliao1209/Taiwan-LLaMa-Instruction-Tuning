@@ -50,12 +50,10 @@ def perplexity(model, tokenizer, data, max_length=2048, incontext=False):
         shift_label = label[..., 1:].contiguous()
         shift_output_mask = output_mask[..., 1:].contiguous()
         perplexity_batch = torch.exp(
-            (loss_fct(shift_logits.transpose(1, 2),
-             shift_label) * shift_output_mask).sum(1)
-            / shift_output_mask.sum(1)
+            (loss_fct(shift_logits.transpose(1, 2), shift_label) * shift_output_mask).sum(1) / shift_output_mask.sum(1)
         )
         ppls += perplexity_batch.tolist()
-    return {"perplexities": ppls, "mean_perplexity": np.mean(ppls)}
+    return {"perplexities": ppls, "mean_perplexity": np.mean(ppls), "std_perplexity": np.std(ppls)}
 
 
 if __name__ == "__main__": 
@@ -100,7 +98,6 @@ if __name__ == "__main__":
     else:
         model_name = "yentinglin/Taiwan-LLM-7B-v2.0-chat"
         revision = "5073b2bbc1aa5519acdc865e99832857ef47f7c9"
-        print("Load model")
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
             revision=revision,
@@ -116,7 +113,7 @@ if __name__ == "__main__":
         tokenizer.pad_token_id = tokenizer.eos_token_id
     
     # Load LoRA
-    if args.peft_path:
+    if (args.method == "lora-fine-tune") and args.peft_path:
         model = PeftModel.from_pretrained(model, args.peft_path)
 
     print(model)
@@ -127,3 +124,4 @@ if __name__ == "__main__":
     model.eval()
     ppl = perplexity(model, tokenizer, data, incontext=True if args.method == "few-shot" else False)
     print("Mean perplexity:", ppl["mean_perplexity"])
+    print("Std  perplexity:", ppl["std_perplexity"])

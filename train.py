@@ -68,8 +68,8 @@ if __name__ == "__main__":
     train_data = read_json(args.train_data_path)[:args.train_num]
     valid_data = read_json(args.valid_data_path)
 
-    train_dataset = ClassicalChineseDataset(train_data, tokenizer)
-    valid_dataset = ClassicalChineseDataset(valid_data, tokenizer)
+    train_dataset = ClassicalChineseDataset(train_data, tokenizer, max_length=512)
+    valid_dataset = ClassicalChineseDataset(valid_data, tokenizer, max_length=2048)
 
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=collate_func)
     valid_loader = DataLoader(valid_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_func)

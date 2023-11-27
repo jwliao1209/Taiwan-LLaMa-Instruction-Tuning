@@ -73,7 +73,7 @@ if __name__ == "__main__":
             generated_tokens = model.generate(
                 input_ids=batch_data["input_ids"],
                 attention_mask=batch_data["attention_mask"],
-                max_new_tokens=100,
+                max_new_tokens=512,
             )
             generations = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)[0]
             generations = generations.replace(batch_data["prompt"][0], "").strip()

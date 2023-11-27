@@ -1,13 +1,10 @@
+.ipynb_checkpoints/
+src/__pycache__
+
 data
 pretrain
 checkpoint
-checkpoint_old
-checkpoint_old1
 wandb
 
-src/__pycache__
-prediction_private.json
-.ipynb_checkpoints/
 EDA.ipynb
 data_analysis/
-tests/test_prediction.json
