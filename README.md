@@ -9,16 +9,26 @@ To set the environment, you can run this command:
 pip install -r configs/requirements.txt
 ```
 
+## Dataset
+
+```
+{
+    "id": "2fb7d211-978f-41c8-a3ab-e51d9df06280",
+    "instruction": "翻譯成文言文：\n於是，廢帝讓瀋慶之的堂侄、直將軍瀋攸之賜瀋慶之毒藥，命瀋慶之自殺。",
+    "output": "帝乃使慶之從父兄子直閣將軍攸之賜慶之藥。"
+}
+```
+
 
 ## Download dataset and model checkpoint
-To download the datasets and model checkpoint, you can run the commad:
+To download the datasets and model checkpoint, you can run the command:
 ```
 bash ./download.sh
 ```
 
 
 ## Reproducing
-To reproduce our best result, you can run the commad:
+To reproduce our best result, you can run the command:
 ```
 bash ./run.sh <pretrain model folder> <lora model folder> <input data path> <output file path>
 ```
@@ -33,7 +43,7 @@ bash ./run.sh \
 
 
 ## Training
-To fine-tune the Taiwan-LLaMa model, you can run the commad:
+To fine-tune the Taiwan-LLaMa model, you can run the command:
 ```
 python train.py --base_model_path <pretrain model folder> \
                 --train_data_path <train data path> \
@@ -50,7 +60,7 @@ python train.py --base_model_path <pretrain model folder> \
 
 
 ## Inference
-To inference the Taiwan-LLaMa model, you can run the commad:
+To inference the Taiwan-LLaMa model, you can run the command:
 ```
 python infer.py --method <support method: lora-fine-tune, zero-shot, and few-shot> \
                 --base_model_path <pretrain model folder> \
@@ -61,7 +71,7 @@ python infer.py --method <support method: lora-fine-tune, zero-shot, and few-sho
 
 
 ## Demo
-To demo the conversation with Taiwan-LLaMa model, you can run the commad:
+To demo the conversation with Taiwan-LLaMa model, you can run the command:
 ```
 python demo.py --method <support method: lora-fine-tune, zero-shot, and few-shot>
                --base_model_path <pretrain model folder> \
