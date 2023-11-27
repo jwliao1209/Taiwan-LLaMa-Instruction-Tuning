@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # data
-if [ ! -d data_ ]; then
+if [ ! -d data ]; then
     gdown https://drive.google.com/uc?id=113qrDhnThl9xbYyej-Qe2eKiAm7C-VdS -O data.zip
 fi
 
 # pretrain
-if [ ! -d pretrain_ ]; then
+if [ ! -d pretrain ]; then
     gdown https://drive.google.com/uc?id=1qlgYaHXzCLmt_EpdIIIc0i4qu83rfqhp -O pretrain.zip
 fi
 
 # checkpoint
-if [ ! -d checkpoint_ ]; then
-    gdown https://drive.google.com/uc?id=1f1zoAqTyxhNbf301d59e6fNiBv5FGVHb -O checkpoint.zip
+if [ ! -d checkpoint ]; then
+    gdown https://drive.google.com/uc?id=1i0d_WDRj-DDG6G7LsTa-sdCqVfZxuHxt -O checkpoint.zip
 fi
