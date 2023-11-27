@@ -29,15 +29,6 @@ def parse_arguments() -> Namespace:
                         type=str,
                         default="checkpoint/epoch=4_ppl=3.649335366725922",
                         help="Path to the saved PEFT checkpoint.")
-    parser.add_argument("--test_data_path", type=str,
-                        default="data/public_test.json",
-                        help="Path to test data.")
-    parser.add_argument("--batch_size", type=int,
-                        default=1,
-                        help="batch size")
-    parser.add_argument("--output_path", type=str,
-                        default="public_prediction.json",
-                        help="output path")
     return parser.parse_args()
 
 
