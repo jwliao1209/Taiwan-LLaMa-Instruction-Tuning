@@ -5,7 +5,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
-from src.prompt import get_prompt, get_incontext_prompt
+from src.prompt import get_prompt
 from src.utils import set_random_seeds, get_bnb_config
 
 
@@ -60,12 +60,8 @@ if __name__ == "__main__":
     # Prepare question
     tokenizer = AutoTokenizer.from_pretrained(args.base_model_path)
     question = input("Please input your question: ")
-    
-    if args.method == "few-shot":
-        prompt = get_incontext_prompt(question)
-    else:
-        prompt = get_prompt(question)
-    
+
+    prompt = get_prompt(question, incontext=True if args.method == "few-shot" else False)
     print("Prompt:", prompt)
 
     question_input_ids = torch.tensor(

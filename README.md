@@ -17,10 +17,10 @@ bash ./download.sh
 ```
 
 
-## Reproducing best result
+## Reproducing
 To reproduce our best result, you can run the commad:
 ```
-bash ./run.sh <pretrain_model_folder> <lora_model_folder> <input_data_path> <output_file_path>
+bash ./run.sh <pretrain model folder> <lora model folder> <input data path> <output file path>
 ```
 For example:
 ```
@@ -35,7 +35,37 @@ bash ./run.sh \
 ## Training
 To fine-tune the Taiwan-LLaMa model, you can run the commad:
 ```
-python train.py
+python train.py --base_model_path <pretrain model folder> \
+                --train_data_path <train data path> \
+                --valid_data_path <valid data path> \
+                --train_num <number of used training data> \
+                --epoch <number of epochs> \
+                --batch_size <number of training batch size> \
+                --accum_grad_step <number of accumulated gradient batch size> \
+                --lr <learning rate> \
+                --lr_scheduler <learning rate scheduler> \
+                --warm_up_step <number of warm up step>
+                --lora_rank <rank of LoRA>
+```
+
+
+## Inference
+To inference the Taiwan-LLaMa model, you can run the commad:
+```
+python infer.py --base_model_path <pretrain model folder> \
+                --peft_path <lora model folder> \
+                --test_data_path <test data path> \
+                --output_path <output file oath>
+```
+
+
+## Demo
+To demo the conversation with Taiwan-LLaMa model, you can run the commad:
+```
+python demo.py --method <support method: lora-fine-tune, zero-shot, and few-shot>
+               --base_model_path <pretrain model folder> \
+               --peft_path <lora model folder> \
+               --test_data_path <test data path>
 ```
 
 

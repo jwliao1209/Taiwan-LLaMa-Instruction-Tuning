@@ -20,6 +20,9 @@ logging.basicConfig(
 
 def parse_arguments() -> Namespace:
     parser = ArgumentParser(description="Taiwan-LLaMa Instruction Tuning")
+    parser.add_argument("--method", type=str,
+                        default="lora-fine-tune",
+                        help="support method: zero-shot, few-shot, and lora-fine-tune")
     parser.add_argument("--base_model_path", type=str,
                         default="pretrain/Taiwan-LLM-7B-v2.0-chat",
                         help="Path to the checkpoint of Taiwan-LLM-7B-v2.0-chat. If not set, this script will use "
@@ -31,9 +34,6 @@ def parse_arguments() -> Namespace:
     parser.add_argument("--test_data_path", type=str,
                         default="data/public_test.json",
                         help="Path to test data.")
-    parser.add_argument("--batch_size", type=int,
-                        default=1,
-                        help="batch size")
     parser.add_argument("--output_path", type=str,
                         default="public_prediction.json",
                         help="output path")
@@ -48,8 +48,11 @@ if __name__ == "__main__":
     # Prepare dataset
     tokenizer = AutoTokenizer.from_pretrained(args.base_model_path, use_fast=False)
     test_data = read_json(args.test_data_path)
-    test_dataset = ClassicalChineseDataset(test_data, tokenizer, is_train=False)
-    test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_func)
+    test_dataset = ClassicalChineseDataset(
+        test_data, tokenizer, is_train=False,
+        incontext=True if args.method == "few-shot" else False
+    )
+    test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, collate_fn=collate_func)
 
     # Prepare model
     device = torch.device(f"cuda:0" if torch.cuda.is_available() else "cpu")
@@ -60,8 +63,8 @@ if __name__ == "__main__":
         quantization_config=bnb_config
     )
     model = PeftModel.from_pretrained(model, args.peft_path)
-
     model.eval()
+
     prediction_list = []
     test_bar = tqdm(test_loader, desc=f"Testing")
     for _, batch_data in enumerate(test_bar, start=1):
@@ -72,16 +75,11 @@ if __name__ == "__main__":
                 attention_mask=batch_data["attention_mask"],
                 max_new_tokens=100,
             )
-            generations = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
-            generations = [g.replace(batch_data["prompt"][0], "").strip() for g in generations]
-            prediction_list.extend(
-                [
-                    {"id": ID, "output": g}
-                    for ID, g in zip(batch_data["id"], generations)
-                ]
-            )
-            for prompt, ans in zip(batch_data["prompt"], generations):
-                logger.debug(f"Question:\n{prompt}\n")
-                logger.debug(f"Answer:\n{ans}\n")
+            generations = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)[0]
+            generations = generations.replace(batch_data["prompt"][0], "").strip()
+            prediction_list.append({"id": batch_data["id"][0], "output": generations})
+            
+            logger.debug(f"Question:\n{batch_data['prompt'][0]}\n")
+            logger.debug(f"Answer:\n{generations}\n")
 
     save_json(prediction_list, args.output_path)

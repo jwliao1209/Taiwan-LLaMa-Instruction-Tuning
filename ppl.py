@@ -7,13 +7,13 @@ from tqdm import tqdm
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.prompt import get_prompt, get_incontext_prompt
+from src.prompt import get_prompt
 from src.utils import set_random_seeds, get_bnb_config
 
 
-def perplexity(model, tokenizer, data, max_length=2048):
+def perplexity(model, tokenizer, data, max_length=2048, incontext=False):
     data_size = len(data)
-    instructions = [get_prompt(x["instruction"]) for x in data]
+    instructions = [get_prompt(x["instruction"], incontext=incontext) for x in data]
     outputs = [x["output"] for x in data]
 
     # Tokenize data
@@ -23,21 +23,14 @@ def perplexity(model, tokenizer, data, max_length=2048):
 
     # Format data
     for i in range(data_size):
-        instruction_input_ids = [tokenizer.bos_token_id] + \
-            tokenized_instructions["input_ids"][i]
-        output_input_ids = tokenized_outputs["input_ids"][i] + \
-            [tokenizer.eos_token_id]
-        tokenized_instructions["input_ids"][i] = instruction_input_ids + \
-            output_input_ids
-        tokenized_instructions["attention_mask"][i] = [
-            1] * len(tokenized_instructions["input_ids"][i])
-        output_mask = [0] * len(instruction_input_ids) + \
-            [1] * len(output_input_ids)
+        instruction_input_ids = [tokenizer.bos_token_id] + tokenized_instructions["input_ids"][i]
+        output_input_ids = tokenized_outputs["input_ids"][i] + [tokenizer.eos_token_id]
+        tokenized_instructions["input_ids"][i] = instruction_input_ids + output_input_ids
+        tokenized_instructions["attention_mask"][i] = [1] * len(tokenized_instructions["input_ids"][i])
+        output_mask = [0] * len(instruction_input_ids) + [1] * len(output_input_ids)
 
-        tokenized_instructions["input_ids"][i] = torch.tensor(
-            tokenized_instructions["input_ids"][i][:max_length])
-        tokenized_instructions["attention_mask"][i] = torch.tensor(
-            tokenized_instructions["attention_mask"][i][:max_length])
+        tokenized_instructions["input_ids"][i] = torch.tensor(tokenized_instructions["input_ids"][i][:max_length])
+        tokenized_instructions["attention_mask"][i] = torch.tensor(tokenized_instructions["attention_mask"][i][:max_length])
         output_mask = torch.tensor(output_mask[:max_length])
         output_masks.append(output_mask)
 
@@ -68,6 +61,11 @@ def perplexity(model, tokenizer, data, max_length=2048):
 if __name__ == "__main__": 
     set_random_seeds()
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--method", type=str,
+        default="lora-fine-tune",
+        help="support method: zero-shot, few-shot, and lora-fine-tune"
+    )
     parser.add_argument(
         "--base_model_path",
         type=str,
@@ -127,5 +125,5 @@ if __name__ == "__main__":
         data = json.load(f)
 
     model.eval()
-    ppl = perplexity(model, tokenizer, data)
+    ppl = perplexity(model, tokenizer, data, incontext=True if args.method == "few-shot" else False)
     print("Mean perplexity:", ppl["mean_perplexity"])

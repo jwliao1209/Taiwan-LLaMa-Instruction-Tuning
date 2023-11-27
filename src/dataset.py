@@ -4,10 +4,11 @@ from src.prompt import get_prompt
 
 
 class ClassicalChineseDataset(Dataset):
-    def __init__(self, data_list, tokenizer, max_length=512, is_train=True):
+    def __init__(self, data_list, tokenizer, max_length=512, is_train=True, incontext=False):
         self.tokenizer = tokenizer
         self.max_length = max_length
         self.is_train = is_train
+        self.incontext = incontext
         self.data_list = self.transform(data_list)
 
     def pad_or_truncate(self, data, padding_token=0):
@@ -18,7 +19,7 @@ class ClassicalChineseDataset(Dataset):
 
     def transform(self, data_list):
         ids = [x["id"] for x in data_list]
-        instructions = [get_prompt(x["instruction"]) for x in data_list]
+        instructions = [get_prompt(x["instruction"], incontext=self.incontext) for x in data_list]
         tokenized_instructions = self.tokenizer(instructions, add_special_tokens=False)
 
         processed_data = []
