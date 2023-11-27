@@ -63,7 +63,7 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     # Prepare dataset
-    tokenizer = AutoTokenizer.from_pretrained(args.base_model_path)
+    tokenizer = AutoTokenizer.from_pretrained(args.base_model_path, use_fast=False)
 
     train_data = read_json(args.train_data_path)[:args.train_num]
     valid_data = read_json(args.valid_data_path)

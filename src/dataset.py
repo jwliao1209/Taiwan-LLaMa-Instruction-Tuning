@@ -30,27 +30,23 @@ class ClassicalChineseDataset(Dataset):
                 instructions_input_ids = [self.tokenizer.bos_token_id] + tokenized_instructions["input_ids"][i]
                 outputs_input_ids = tokenized_outputs["input_ids"][i] + [self.tokenizer.eos_token_id]
                 processed_data_input_ids =  instructions_input_ids + outputs_input_ids
-                processed_data_attention_mask = [1] * len(processed_data_input_ids)
-                processed_data_labels = [-100] * len(instructions_input_ids) + outputs_input_ids
-                processed_data_output_mask = [0] * len(instructions_input_ids) + [1] * len(outputs_input_ids)
                 processed_data.append(
                     {
                         "id": ids[i],
                         "input_ids": self.pad_or_truncate(processed_data_input_ids),
-                        "attention_mask": self.pad_or_truncate(processed_data_attention_mask),
-                        "labels": self.pad_or_truncate(processed_data_labels),
-                        "output_mask": self.pad_or_truncate(processed_data_output_mask),
+                        "attention_mask": self.pad_or_truncate([1] * len(processed_data_input_ids)),
+                        "labels": self.pad_or_truncate([-100] * len(instructions_input_ids) + outputs_input_ids),
+                        "output_mask": self.pad_or_truncate([0] * len(instructions_input_ids) + [1] * len(outputs_input_ids)),
                     }
                 )
         else:
             for i in range(len(data_list)):
                 processed_data_input_ids = [self.tokenizer.bos_token_id] + tokenized_instructions["input_ids"][i]
-                processed_data_attention_mask = [1] * len(processed_data_input_ids)
                 processed_data.append(
                     {
                         "id": ids[i],
                         "input_ids": processed_data_input_ids,
-                        "attention_mask": processed_data_attention_mask,
+                        "attention_mask": [1] * len(processed_data_input_ids),
                         "prompt": instructions[i],
                     }
                 )
@@ -68,5 +64,8 @@ def collate_func(data: list) -> dict:
     data_list_dict = {k: [dic[k] for dic in data] for k in data[0]}
 
     # convert dict of list to dict of torch tensor
-    data_tensor_dict = {k: v if k in ["id", "prompt"] else torch.tensor(v) for k, v in data_list_dict.items()}
+    data_tensor_dict = {
+        k: v if isinstance(v[0], str) else torch.tensor(v)
+        for k, v in data_list_dict.items()
+    }
     return data_tensor_dict

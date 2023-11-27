@@ -46,7 +46,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("ADL Homework3: Taiwan-LLaMa Inference")
 
     # Prepare dataset
-    tokenizer = AutoTokenizer.from_pretrained(args.base_model_path)
+    tokenizer = AutoTokenizer.from_pretrained(args.base_model_path, use_fast=False)
     test_data = read_json(args.test_data_path)
     test_dataset = ClassicalChineseDataset(test_data, tokenizer, is_train=False)
     test_loader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=collate_func)
@@ -70,6 +70,7 @@ if __name__ == "__main__":
             generated_tokens = model.generate(
                 input_ids=batch_data["input_ids"],
                 attention_mask=batch_data["attention_mask"],
+                max_new_tokens=100,
             )
             generations = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
             generations = [g.replace(batch_data["prompt"][0], "").strip() for g in generations]
