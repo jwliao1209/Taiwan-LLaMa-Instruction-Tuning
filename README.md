@@ -52,7 +52,8 @@ python train.py --base_model_path <pretrain model folder> \
 ## Inference
 To inference the Taiwan-LLaMa model, you can run the commad:
 ```
-python infer.py --base_model_path <pretrain model folder> \
+python infer.py --method <support method: lora-fine-tune, zero-shot, and few-shot> \
+                --base_model_path <pretrain model folder> \
                 --peft_path <lora model folder> \
                 --test_data_path <test data path> \
                 --output_path <output file oath>
