@@ -9,7 +9,9 @@ To set the environment, you can run this command:
 pip install -r configs/requirements.txt
 ```
 
-## Dataset
+
+## Data Format
+The dataset comprises keys labeled id, instruction, and output. An example of the data structure is displayed as follows:
 
 ```
 {
