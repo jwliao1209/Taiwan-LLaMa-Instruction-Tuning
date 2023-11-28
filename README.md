@@ -10,6 +10,13 @@ pip install -r configs/requirements.txt
 ```
 
 
+## Download LoRA checkpoint
+To download the LoRA checkpoint, you can run the command:
+```
+bash ./download.sh
+```
+
+
 ## Data Format
 The dataset comprises keys labeled id, instruction, and output. An example of the data structure is displayed as follows:
 
@@ -19,13 +26,6 @@ The dataset comprises keys labeled id, instruction, and output. An example of th
     "instruction": "翻譯成文言文：\n於是，廢帝讓瀋慶之的堂侄、直將軍瀋攸之賜瀋慶之毒藥，命瀋慶之自殺。",
     "output": "帝乃使慶之從父兄子直閣將軍攸之賜慶之藥。"
 }
-```
-
-
-## Download dataset and model checkpoint
-To download the datasets and model checkpoint, you can run the command:
-```
-bash ./download.sh
 ```
 
 
