@@ -1,18 +1,18 @@
-import json
-import argparse
 import torch
 import numpy as np
-
 from tqdm import tqdm
-from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
+import json
+from peft import PeftModel
 from utils import get_prompt, get_bnb_config
+import argparse
 
 
-def perplexity(model, tokenizer, data, max_length=2048, incontext=False):
+def perplexity(
+    model, tokenizer, data, max_length=2048,
+):
     data_size = len(data)
-    instructions = [get_prompt(x["instruction"], incontext=incontext) for x in data]
+    instructions = [get_prompt(x["instruction"]) for x in data]
     outputs = [x["output"] for x in data]
 
     # Tokenize data
@@ -22,14 +22,21 @@ def perplexity(model, tokenizer, data, max_length=2048, incontext=False):
 
     # Format data
     for i in range(data_size):
-        instruction_input_ids = [tokenizer.bos_token_id] + tokenized_instructions["input_ids"][i]
-        output_input_ids = tokenized_outputs["input_ids"][i] + [tokenizer.eos_token_id]
-        tokenized_instructions["input_ids"][i] = instruction_input_ids + output_input_ids
-        tokenized_instructions["attention_mask"][i] = [1] * len(tokenized_instructions["input_ids"][i])
-        output_mask = [0] * len(instruction_input_ids) + [1] * len(output_input_ids)
+        instruction_input_ids = [tokenizer.bos_token_id] + \
+            tokenized_instructions["input_ids"][i]
+        output_input_ids = tokenized_outputs["input_ids"][i] + \
+            [tokenizer.eos_token_id]
+        tokenized_instructions["input_ids"][i] = instruction_input_ids + \
+            output_input_ids
+        tokenized_instructions["attention_mask"][i] = [
+            1] * len(tokenized_instructions["input_ids"][i])
+        output_mask = [0] * len(instruction_input_ids) + \
+            [1] * len(output_input_ids)
 
-        tokenized_instructions["input_ids"][i] = torch.tensor(tokenized_instructions["input_ids"][i][:max_length])
-        tokenized_instructions["attention_mask"][i] = torch.tensor(tokenized_instructions["attention_mask"][i][:max_length])
+        tokenized_instructions["input_ids"][i] = torch.tensor(
+            tokenized_instructions["input_ids"][i][:max_length])
+        tokenized_instructions["attention_mask"][i] = torch.tensor(
+            tokenized_instructions["attention_mask"][i][:max_length])
         output_mask = torch.tensor(output_mask[:max_length])
         output_masks.append(output_mask)
 
@@ -49,36 +56,34 @@ def perplexity(model, tokenizer, data, max_length=2048, incontext=False):
         shift_label = label[..., 1:].contiguous()
         shift_output_mask = output_mask[..., 1:].contiguous()
         perplexity_batch = torch.exp(
-            (loss_fct(shift_logits.transpose(1, 2), shift_label) * shift_output_mask).sum(1) / shift_output_mask.sum(1)
+            (loss_fct(shift_logits.transpose(1, 2),
+             shift_label) * shift_output_mask).sum(1)
+            / shift_output_mask.sum(1)
         )
         ppls += perplexity_batch.tolist()
-    return {"perplexities": ppls, "mean_perplexity": np.mean(ppls), "std_perplexity": np.std(ppls)}
+    return {"perplexities": ppls, "mean_perplexity": np.mean(ppls)}
 
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--method", type=str,
-        default="lora-fine-tune",
-        help="support method: zero-shot, few-shot, and lora-fine-tune"
-    )
     parser.add_argument(
         "--base_model_path",
         type=str,
-        default="pretrain/Taiwan-LLM-7B-v2.0-chat",
+        default="",
         help="Path to the checkpoint of Taiwan-LLM-7B-v2.0-chat. If not set, this script will use "
         "the checkpoint from Huggingface (revision = 5073b2bbc1aa5519acdc865e99832857ef47f7c9)."
     )
     parser.add_argument(
         "--peft_path",
         type=str,
-        default="checkpoint/epoch=4_ppl=3.649335366725922",
+        required=True,
         help="Path to the saved PEFT checkpoint."
     )
     parser.add_argument(
         "--test_data_path",
         type=str,
-        default="data/public_test.json",
+        default="",
+        required=True,
         help="Path to test data."
     )
     args = parser.parse_args()
@@ -109,17 +114,13 @@ if __name__ == "__main__":
 
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
-    
-    # Load LoRA
-    if (args.method == "lora-fine-tune") and args.peft_path:
-        model = PeftModel.from_pretrained(model, args.peft_path)
 
-    print(model)
+    # Load LoRA
+    model = PeftModel.from_pretrained(model, args.peft_path)
 
     with open(args.test_data_path, "r") as f:
         data = json.load(f)
 
     model.eval()
-    ppl = perplexity(model, tokenizer, data, incontext=True if args.method == "few-shot" else False)
+    ppl = perplexity(model, tokenizer, data)
     print("Mean perplexity:", ppl["mean_perplexity"])
-    print("Std  perplexity:", ppl["std_perplexity"])

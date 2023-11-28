@@ -36,7 +36,7 @@ For example:
 ```
 bash ./run.sh \
     pretrain/Taiwan-LLM-7B-v2.0-chat \
-    checkpoint/epoch=4_ppl=3.649335366725922 \
+    adapter_checkpoint \
     data/public_test.json \
     public_prediction.json
 ```

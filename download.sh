@@ -11,6 +11,6 @@ if [ ! -d pretrain ]; then
 fi
 
 # checkpoint
-if [ ! -d checkpoint ]; then
-    gdown https://drive.google.com/uc?id=1i0d_WDRj-DDG6G7LsTa-sdCqVfZxuHxt -O checkpoint.zip
+if [ ! -d adapter_checkpoint ]; then
+    gdown https://drive.google.com/uc?id=1XrA6szuQn_G2FoYhivu3knwX3j6VAMRa -O adapter_checkpoint.zip
 fi

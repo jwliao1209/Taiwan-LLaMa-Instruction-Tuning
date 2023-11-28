@@ -5,4 +5,7 @@ src/__pycache__
 data
 pretrain
 checkpoint
+adapter_checkpoint
 wandb
+public_prediction.json
+private_prediction.json

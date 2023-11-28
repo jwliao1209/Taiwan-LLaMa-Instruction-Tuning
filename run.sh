@@ -1,15 +1,15 @@
 #!/bin/bash
 
-if [ ! -d data ]; then
-    unzip data.zip
-fi
+# if [ ! -d data ]; then
+#     unzip data.zip
+# fi
 
-if [ ! -d pretrain ]; then
-    unzip pretrain.zip
-fi
+# if [ ! -d pretrain ]; then
+#     unzip pretrain.zip
+# fi
 
-if [ ! -d checkpoint ]; then
-    unzip checkpoint.zip
+if [ ! -d adapter_checkpoint ]; then
+    unzip adapter_checkpoint.zip
 fi
 
 python infer.py --base_model_path "${1}" \
