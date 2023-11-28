@@ -7,8 +7,9 @@ from torch.utils.data import DataLoader
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
+from utils import get_bnb_config
 from src.dataset import ClassicalChineseDataset, collate_func
-from src.utils import set_random_seeds, read_json, get_bnb_config, dict_to_device, save_json
+from src.utils import set_random_seeds, read_json, dict_to_device, save_json
 
 
 logging.basicConfig(

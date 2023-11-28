@@ -7,8 +7,8 @@ from tqdm import tqdm
 from peft import PeftModel
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from src.prompt import get_prompt
-from src.utils import set_random_seeds, get_bnb_config
+from utils import get_prompt, get_bnb_config
+from src.utils import set_random_seeds
 
 
 def perplexity(model, tokenizer, data, max_length=2048, incontext=False):

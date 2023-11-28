@@ -5,8 +5,8 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 
-from src.prompt import get_prompt
-from src.utils import set_random_seeds, get_bnb_config
+from utils import get_prompt, get_bnb_config
+from src.utils import set_random_seeds
 
 
 logging.basicConfig(

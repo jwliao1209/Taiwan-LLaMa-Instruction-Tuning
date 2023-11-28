@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data.dataset import Dataset
-from src.prompt import get_prompt
+from utils import get_prompt
 
 
 class ClassicalChineseDataset(Dataset):
