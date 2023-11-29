@@ -2,6 +2,8 @@
 
 This repository is implementation of Homework 3 for CSIE5431 Applied Deep Learning course in 2023 Fall semester at National Taiwan University.
 
+<img width="500" alt="instruction_tuning" src="https://github.com/jwliao1209/Taiwan-LLaMa-Instruction-Tuning/assets/55970911/68bba37f-8695-4335-b296-960f9e753cd9">
+
 
 ## Setting the Environment 
 To set the environment, you can run this command:
