@@ -31,6 +31,7 @@ The dataset comprises keys labeled id, instruction, and output. An example of th
     "output": "帝乃使慶之從父兄子直閣將軍攸之賜慶之藥。"
 }
 ```
+Note: If you wish to download the Taiwan-LLaMa pretrained weights and dataset, please uncomment the lines in the `download.sh` script.
 
 
 ## Reproducing
