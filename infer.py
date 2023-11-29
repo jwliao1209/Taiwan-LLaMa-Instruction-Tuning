@@ -47,7 +47,7 @@ if __name__ == "__main__":
     logger = logging.getLogger("ADL Homework3: Taiwan-LLaMa Inference")
 
     # Prepare dataset
-    tokenizer = AutoTokenizer.from_pretrained(args.base_model_path, use_fast=False)
+    tokenizer = AutoTokenizer.from_pretrained(args.base_model_path)
     test_data = read_json(args.test_data_path)
     test_dataset = ClassicalChineseDataset(
         test_data, tokenizer, is_train=False,
